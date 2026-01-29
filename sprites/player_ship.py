@@ -10,10 +10,11 @@ class PlayerShip:
 
         self.angle = 0  # градусов
 
-
         self.vx = 0.0
         self.vy = 0.0
 
+        self.landed = False
+        self.landed_body = None
 
         self.throttle = 0.0
         self.thrust = 1200
@@ -26,23 +27,23 @@ class PlayerShip:
 
         self.color = arcade.color.WHITE
 
-
     def update(self, dt: float):
+        if not self.landed:
+            if self.fuel > 0 and self.throttle > 0:
+                self.fuel -= self.throttle * dt * 10
 
-        if self.throttle > 0 and self.fuel > 0:
-            self.fuel -= self.throttle * dt * 15
+                rad = math.radians(self.angle)
+                thrust = self.throttle * 300
 
-            rad = math.radians(self.angle)
-            ax = math.cos(rad) * self.throttle * self.thrust
-            ay = math.sin(rad) * self.throttle * self.thrust
-
-            self.vx += ax * dt
-            self.vy += ay * dt
-
+                self.vx += math.cos(rad) * thrust * dt
+                self.vy += math.sin(rad) * thrust * dt
 
         self.center_x += self.vx * dt
         self.center_y += self.vy * dt
 
+    def apply_gravity(self, ax, ay, dt):
+        self.vx += ax * dt
+        self.vy += ay * dt
 
     def draw(self):
 
@@ -73,3 +74,6 @@ class PlayerShip:
                 5 + self.throttle * 6,
                 arcade.color.ORANGE_RED
             )
+
+    def get_speed(self):
+        return math.hypot(self.vx, self.vy)
