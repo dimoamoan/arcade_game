@@ -1,20 +1,19 @@
 import arcade
 from sprites.player_ship import PlayerShip
-from settings import FUEL_CONSUMPTION
 
 
 class SpaceView(arcade.View):
     def __init__(self):
         super().__init__()
 
-        # Камеры
+
         self.world_camera = arcade.camera.Camera2D()
         self.gui_camera = arcade.camera.Camera2D()
 
-        # Игрок
+
         self.ship = PlayerShip(0, 0)
 
-        # Управление
+
         self.keys = set()
 
     def on_show(self):
@@ -27,7 +26,6 @@ class SpaceView(arcade.View):
         self.keys.discard(key)
 
     def on_update(self, dt):
-        # ПОВОРОТ
         if arcade.key.LEFT in self.keys:
             self.ship.angle += self.ship.turn_speed * dt
         if arcade.key.RIGHT in self.keys:
@@ -41,7 +39,7 @@ class SpaceView(arcade.View):
 
         self.ship.update(dt)
 
-        # камера строго за кораблём
+
         self.world_camera.position = (
             self.ship.center_x,
             self.ship.center_y
@@ -50,12 +48,12 @@ class SpaceView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        # МИР
+
         self.world_camera.use()
         self.draw_grid()
         self.ship.draw()
 
-        # HUD
+
         self.gui_camera.use()
         self.draw_hud()
 
@@ -78,7 +76,7 @@ class SpaceView(arcade.View):
         left = padding
         bottom = self.window.height - panel_height - padding
 
-        # Фон панели
+
         arcade.draw_lbwh_rectangle_filled(
             left,
             bottom,
@@ -87,7 +85,7 @@ class SpaceView(arcade.View):
             arcade.color.BLACK_OLIVE
         )
 
-        # Рамка панели (ВОТ ТУТ ФИКС)
+
         arcade.draw_lbwh_rectangle_outline(
             left,
             bottom,
@@ -121,7 +119,7 @@ class SpaceView(arcade.View):
             14
         )
 
-        # Координаты (внизу экрана)
+
         arcade.draw_text(
             f"X: {int(self.ship.center_x)}  Y: {int(self.ship.center_y)}",
             padding,
