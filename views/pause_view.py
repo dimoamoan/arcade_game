@@ -37,4 +37,4 @@ class PauseView(arcade.View):
 
     def on_key_press(self, key, modifiers):
         if key == arcade.key.ESCAPE:
-            self.window.show_view(self.window.previous_view)
+            self.window.show_view(self.previous_view)

@@ -1,91 +1,142 @@
 import arcade
-from views.pause_view import PauseView
-from views.final_view import FinalView
-from settings import SCREEN_WIDTH, SCREEN_HEIGHT
 from sprites.player_ship import PlayerShip
+from settings import FUEL_CONSUMPTION
 
 
 class SpaceView(arcade.View):
     def __init__(self):
         super().__init__()
 
-        # Инициализация корабля сразу
-        self.ship = PlayerShip(
-            SCREEN_WIDTH // 2,
-            SCREEN_HEIGHT // 2
-        )
+        # Камеры
+        self.world_camera = arcade.camera.Camera2D()
+        self.gui_camera = arcade.camera.Camera2D()
 
-        # Набор нажатых клавиш
-        self.pressed_keys = set()
+        # Игрок
+        self.ship = PlayerShip(0, 0)
+
+        # Управление
+        self.keys = set()
 
     def on_show(self):
-        arcade.set_background_color(arcade.color.DARK_MIDNIGHT_BLUE)
+        arcade.set_background_color(arcade.color.BLACK)
 
-        # Сбрасываем позицию корабля при повторном показе
-        self.ship.center_x = SCREEN_WIDTH // 2
-        self.ship.center_y = SCREEN_HEIGHT // 2
+    def on_key_press(self, key, modifiers):
+        self.keys.add(key)
 
-    def on_update(self, delta_time):
-        # Защита на всякий случай
-        if self.ship is None:
-            return
+    def on_key_release(self, key, modifiers):
+        self.keys.discard(key)
 
-        self.ship.change_x = 0
-        self.ship.change_y = 0
+    def on_update(self, dt):
+        # ПОВОРОТ
+        if arcade.key.LEFT in self.keys:
+            self.ship.angle += self.ship.turn_speed * dt
+        if arcade.key.RIGHT in self.keys:
+            self.ship.angle -= self.ship.turn_speed * dt
 
-        if self.ship.fuel > 0:
-            if "up" in self.pressed_keys:
-                self.ship.change_y += self.ship.speed
-            if "down" in self.pressed_keys:
-                self.ship.change_y -= self.ship.speed
-            if "left" in self.pressed_keys:
-                self.ship.change_x -= self.ship.speed
-            if "right" in self.pressed_keys:
-                self.ship.change_x += self.ship.speed
+        # ТЯГА
+        if arcade.key.UP in self.keys:
+            self.ship.throttle = min(1.0, self.ship.throttle + 1.5 * dt)
+        elif arcade.key.DOWN in self.keys:
+            self.ship.throttle = max(0.0, self.ship.throttle - 3.5 * dt)
 
-            if self.pressed_keys:
-                self.ship.fuel -= 1
+        self.ship.update(dt)
 
-        self.ship.update()
+        # камера строго за кораблём
+        self.world_camera.position = (
+            self.ship.center_x,
+            self.ship.center_y
+        )
 
     def on_draw(self):
         self.clear()
 
-        if self.ship:
-            self.ship.draw()
+        # МИР
+        self.world_camera.use()
+        self.draw_grid()
+        self.ship.draw()
+
+        # HUD
+        self.gui_camera.use()
+        self.draw_hud()
+
+
+    def draw_grid(self):
+        step = 200
+        size = 3000
+
+        for x in range(-size, size + 1, step):
+            arcade.draw_line(x, -size, x, size, arcade.color.DARK_GRAY)
+
+        for y in range(-size, size + 1, step):
+            arcade.draw_line(-size, y, size, y, arcade.color.DARK_GRAY)
+
+    def draw_hud(self):
+        padding = 10
+        panel_width = 280
+        panel_height = 80
+
+        left = padding
+        bottom = self.window.height - panel_height - padding
+
+        # Фон панели
+        arcade.draw_lbwh_rectangle_filled(
+            left,
+            bottom,
+            panel_width,
+            panel_height,
+            arcade.color.BLACK_OLIVE
+        )
+
+        # Рамка панели (ВОТ ТУТ ФИКС)
+        arcade.draw_lbwh_rectangle_outline(
+            left,
+            bottom,
+            panel_width,
+            panel_height,
+            arcade.color.WHITE,
+            2
+        )
 
         arcade.draw_text(
-            f"Fuel: {self.ship.fuel if self.ship else 0}",
-            20,
-            SCREEN_HEIGHT - 30,
+            f"Fuel: {int(self.ship.fuel)}",
+            left + 10,
+            bottom + panel_height - 25,
             arcade.color.WHITE,
             14
         )
 
-    def on_key_press(self, key, modifiers):
-        if key == arcade.key.ESCAPE:
-            pause = PauseView()
-            pause.previous_view = self
-            self.window.show_view(pause)
+        arcade.draw_text(
+            f"Health: {int(self.ship.health)}",
+            left + 10,
+            bottom + panel_height - 45,
+            arcade.color.WHITE,
+            14
+        )
 
-        if key in (arcade.key.W, arcade.key.UP):
-            self.pressed_keys.add("up")
-        if key in (arcade.key.S, arcade.key.DOWN):
-            self.pressed_keys.add("down")
-        if key in (arcade.key.A, arcade.key.LEFT):
-            self.pressed_keys.add("left")
-        if key in (arcade.key.D, arcade.key.RIGHT):
-            self.pressed_keys.add("right")
+        arcade.draw_text(
+            f"Score: {self.ship.score}",
+            left + 10,
+            bottom + panel_height - 65,
+            arcade.color.WHITE,
+            14
+        )
 
-        if key == arcade.key.F:
-            self.window.show_view(FinalView())
+        # Координаты (внизу экрана)
+        arcade.draw_text(
+            f"X: {int(self.ship.center_x)}  Y: {int(self.ship.center_y)}",
+            padding,
+            10,
+            arcade.color.GRAY,
+            12
+        )
 
-    def on_key_release(self, key, modifiers):
-        if key in (arcade.key.W, arcade.key.UP):
-            self.pressed_keys.discard("up")
-        if key in (arcade.key.S, arcade.key.DOWN):
-            self.pressed_keys.discard("down")
-        if key in (arcade.key.A, arcade.key.LEFT):
-            self.pressed_keys.discard("left")
-        if key in (arcade.key.D, arcade.key.RIGHT):
-            self.pressed_keys.discard("right")
+        arcade.draw_text(
+            f"Throttle: {int(self.ship.throttle * 100)}%",
+            left + 150,
+            bottom + panel_height - 25,
+            arcade.color.WHITE,
+            14
+        )
+
+
+

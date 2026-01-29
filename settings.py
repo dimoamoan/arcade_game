@@ -7,3 +7,6 @@ PLAYER_ROTATION_SPEED = 3
 
 START_FUEL = 1000
 START_HEALTH = 100
+
+FUEL_CONSUMPTION = 0.2  # топлива за кадр движения
+
