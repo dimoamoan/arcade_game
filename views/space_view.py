@@ -6,6 +6,10 @@ from views.victory_view import VictoryView
 import random
 from views.final_view import FinalView
 
+from views.planet_view import PlanetView
+
+def land_on(self, body):
+    self.window.show_view(PlanetView(self))
 
 class SpaceView(arcade.View):
     def __init__(self):
