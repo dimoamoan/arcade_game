@@ -4,16 +4,17 @@ import math
 
 class CelestialBody:
     def __init__(
-        self,
-        x,
-        y,
-        radius,
-        mass,
-        color,
-        orbit_center=None,
-        orbit_radius=None,
-        orbit_angle=0,
-        body_type="planet"
+            self,
+            x,
+            y,
+            radius,
+            mass,
+            color,
+            orbit_center=None,
+            orbit_radius=None,
+            orbit_angle=0,
+            body_type="planet",
+            planet_index=0  # <--- ДОБАВЛЕНО: номер планеты
     ):
         self.x = x
         self.y = y
@@ -26,6 +27,7 @@ class CelestialBody:
         self.orbit_angle = orbit_angle
         self.body_type = body_type
 
+        self.planet_index = planet_index  # <--- ЗАПОМИНАЕМ НОМЕР
         self.visited = False
 
     # -----------------------------
@@ -36,6 +38,9 @@ class CelestialBody:
             self.radius,
             self.color
         )
+        # Можно временно вывести номер планеты для отладки
+        if self.body_type == "planet":
+            arcade.draw_text(str(self.planet_index), self.x, self.y, arcade.color.WHITE, 12, anchor_x="center")
 
     # -----------------------------
     def draw_orbit(self):

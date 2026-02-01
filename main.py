@@ -1,4 +1,4 @@
-import arcade
+ import arcade
 
 from settings import SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_TITLE
 from views.menu_view import MenuView
