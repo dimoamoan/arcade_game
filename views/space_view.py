@@ -119,8 +119,27 @@ class SpaceView(arcade.View):
                         self.window.show_view(FinalView(False, self.visited_planets, self.total_planets))
 
         # Если взлетели (пока не используется, т.к. мы уходим в мини-игру)
-        if self.ship.landed and arcade.key.UP in self.keys:
-            pass
+        if not self.ship.landed:  # <-- ВАЖНО: проверяем только если мы еще не сели
+            for body in self.bodies:
+                dx = self.ship.center_x - body.x
+                dy = self.ship.center_y - body.y
+                dist = math.hypot(dx, dy)
+
+                if dist <= body.radius + 5:
+                    if body.body_type == "planet":
+                        # Если планета пройдена, просто отталкиваем корабль (чтобы не застрял)
+                        if body.visited:
+                            angle = math.atan2(dy, dx)
+                            self.ship.vx += math.cos(angle) * 50
+                            self.ship.vy += math.sin(angle) * 50
+                        else:
+                            speed = math.hypot(self.ship.vx, self.ship.vy)
+                            if speed >= 250:
+                                self.ship.health -= 20
+                            self.land_on(body)
+
+                    elif body.body_type == "black_hole":
+                        self.land_on(body)
 
         rad = math.radians(self.ship.angle)
         # Сопротивление среды (космос, но для играбельности)
@@ -136,7 +155,19 @@ class SpaceView(arcade.View):
             self.window.show_view(FinalView(False, self.visited_planets, self.total_planets))
 
     def land_on(self, body):
-        # Ставим корабль на поверхность визуально
+        # 1. Если это черная дыра - логика конца игры
+        if body.body_type == "black_hole":
+            if self.visited_planets >= self.total_planets:
+                self.window.show_view(VictoryView())
+            else:
+                self.window.show_view(FinalView(False, self.visited_planets, self.total_planets))
+            return
+
+        # 2. Если планета уже посещена - не садимся (или можно просто вывести сообщение)
+        if body.visited:
+            return
+
+        # 3. Визуально ставим корабль на планету
         dx = self.ship.center_x - body.x
         dy = self.ship.center_y - body.y
         dist = math.hypot(dx, dy)
@@ -153,13 +184,13 @@ class SpaceView(arcade.View):
         self.ship.landed = True
         self.ship.landed_body = body
 
-        # ЗАПУСК ВТОРОЙ ИГРЫ
-        # Передаем self (SpaceView), чтобы вернуться назад
-        # И передаем body.planet_index, чтобы открыть нужный уровень
-        minigame = MiniGameView(self, body.planet_index)
+        # 4. ЗАПУСКАЕМ УРОВЕНЬ
+        # Передаем:
+        # self -> чтобы знать, куда вернуться
+        # body.planet_index -> чтобы знать сложность уровня
+        # body -> чтобы пометить эту конкретную планету как visited
+        minigame = MiniGameView(self, body.planet_index, body)
         self.window.show_view(minigame)
-
-
 
     def draw_grid(self):
         step = 300
