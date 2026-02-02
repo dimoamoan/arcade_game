@@ -7,7 +7,7 @@ class PauseView(arcade.View):
     def on_draw(self):
         self.clear()
 
-        # Затемнение экрана
+
         arcade.draw_lrbt_rectangle_filled(
             0,
             SCREEN_WIDTH,

@@ -18,7 +18,6 @@ class PlanetView(arcade.View):
 
         self.score = space_view.ship.score
 
-        # спавн инопланетян
         for _ in range(8):
             self.aliens.append(
                 Alien(
@@ -30,7 +29,6 @@ class PlanetView(arcade.View):
     def on_show(self):
         arcade.set_background_color(arcade.color.DARK_BROWN)
 
-    # ---------- INPUT ----------
     def on_key_press(self, key, modifiers):
         if key == arcade.key.W:
             self.player.change_y = self.player.speed
@@ -41,7 +39,6 @@ class PlanetView(arcade.View):
         if key == arcade.key.D:
             self.player.change_x = self.player.speed
 
-        # атака (ближняя)
         if key == arcade.key.F:
             for alien in arcade.check_for_collision_with_list(
                 self.player, self.aliens
@@ -59,7 +56,6 @@ class PlanetView(arcade.View):
                             )
                         )
 
-        # возврат в корабль
         if key == arcade.key.SPACE:
             self.space_view.ship.score = self.score
             self.window.show_view(self.space_view)
@@ -70,7 +66,6 @@ class PlanetView(arcade.View):
         if key in (arcade.key.A, arcade.key.D):
             self.player.change_x = 0
 
-    # ---------- UPDATE ----------
     def on_update(self, dt):
         self.player.update(dt)
 
@@ -82,7 +77,6 @@ class PlanetView(arcade.View):
                 pickup.remove_from_sprite_lists()
                 self.score += 2
 
-    # ---------- DRAW ----------
     def on_draw(self):
         self.clear()
 

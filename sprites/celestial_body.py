@@ -14,7 +14,7 @@ class CelestialBody:
             orbit_radius=None,
             orbit_angle=0,
             body_type="planet",
-            planet_index=0  # <--- ДОБАВЛЕНО: номер планеты
+            planet_index=0
     ):
         self.x = x
         self.y = y
@@ -27,10 +27,10 @@ class CelestialBody:
         self.orbit_angle = orbit_angle
         self.body_type = body_type
 
-        self.planet_index = planet_index  # <--- ЗАПОМИНАЕМ НОМЕР
+        self.planet_index = planet_index
         self.visited = False
 
-    # -----------------------------
+
     def draw(self):
         arcade.draw_circle_filled(
             self.x,
@@ -38,11 +38,11 @@ class CelestialBody:
             self.radius,
             self.color
         )
-        # Можно временно вывести номер планеты для отладки
+
         if self.body_type == "planet":
             arcade.draw_text(str(self.planet_index), self.x, self.y, arcade.color.WHITE, 12, anchor_x="center")
 
-    # -----------------------------
+
     def draw_orbit(self):
         if self.orbit_center is None:
             return
@@ -57,7 +57,7 @@ class CelestialBody:
             2
         )
 
-    # -----------------------------
+
     def update_orbit(self):
         if self.orbit_center is None:
             return
@@ -66,7 +66,7 @@ class CelestialBody:
         self.x = cx + self.orbit_radius * math.cos(self.orbit_angle)
         self.y = cy + self.orbit_radius * math.sin(self.orbit_angle)
 
-    # -----------------------------
+
     def gravity_at(self, ship):
         dx = self.x - ship.center_x
         dy = self.y - ship.center_y

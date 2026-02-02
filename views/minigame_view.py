@@ -6,11 +6,11 @@ import math
 class MiniGameView(arcade.View):
     def __init__(self, space_view, level_index, planet_body):
         super().__init__()
-        self.space_view = space_view  # Запоминаем окно космоса
+        self.space_view = space_view
         self.level = level_index
-        self.planet_body = planet_body  # Запоминаем саму планету, чтобы пометить её
+        self.planet_body = planet_body
 
-        # Настройки сложности
+
         self.win_resources_target = 3 + self.level
         self.win_score_target = 50 + (self.level * 20)
         self.current_alien_speed = 2 + (self.level * 0.5)
@@ -20,12 +20,12 @@ class MiniGameView(arcade.View):
         self.game_over = False
         self.victory = False
 
-        # Текстуры
+
         self.player_texture = arcade.make_circle_texture(30, arcade.color.CYAN)
         self.alien_texture = arcade.make_soft_circle_texture(30, arcade.color.RED_ORANGE)
         self.resource_texture = arcade.make_circle_texture(20, arcade.color.GOLD)
 
-        # UI Текст
+
         self.ui_text_level = arcade.Text(f"PLANET {self.level}", 10, self.window.height - 30, arcade.color.WHITE, 20)
         self.ui_text_score = arcade.Text("", 10, self.window.height - 60, arcade.color.WHITE, 14)
         self.ui_text_res = arcade.Text("", 10, self.window.height - 80, arcade.color.GOLD, 14)
@@ -75,8 +75,6 @@ class MiniGameView(arcade.View):
             self.draw_end_screen("PLANET CONQUERED", arcade.color.GREEN)
 
     def draw_end_screen(self, title, color):
-        # ИСПРАВЛЕНИЕ: Используем draw_lrtb_rectangle_filled
-        # (left, right, top, bottom, color)
         arcade.draw_lrbt_rectangle_filled(0, self.window.width,
             0,
             self.window.height,
@@ -94,11 +92,11 @@ class MiniGameView(arcade.View):
         self.player_list.update()
         self.bullet_list.update()
 
-        # Ограничение экрана
+
         if self.player_sprite.left < 0: self.player_sprite.left = 0
         if self.player_sprite.right > self.window.width: self.player_sprite.right = self.window.width
 
-        # Движение врагов и ресурсов
+
         for sprite in self.alien_list:
             sprite.center_y -= self.current_alien_speed
             if sprite.top < 0: sprite.remove_from_sprite_lists()
@@ -107,7 +105,7 @@ class MiniGameView(arcade.View):
             sprite.center_y -= 2
             if sprite.top < 0: sprite.remove_from_sprite_lists()
 
-        # Пули
+
         for bullet in self.bullet_list:
             hit = arcade.check_for_collision_with_list(bullet, self.alien_list)
             if hit:
@@ -116,10 +114,9 @@ class MiniGameView(arcade.View):
                     alien.remove_from_sprite_lists()
                     self.score += 10
 
-        # Столкновения игрока
+
         if arcade.check_for_collision_with_list(self.player_sprite, self.alien_list):
             self.score -= 10
-            # Очищаем врагов, с которыми столкнулись, чтобы не снимало очки каждый кадр
             for alien in arcade.check_for_collision_with_list(self.player_sprite, self.alien_list):
                 alien.remove_from_sprite_lists()
 
@@ -127,15 +124,12 @@ class MiniGameView(arcade.View):
             res.remove_from_sprite_lists()
             self.resources_collected += 1
 
-        # ПРОВЕРКА ПОБЕДЫ
         if self.score >= self.win_score_target and self.resources_collected >= self.win_resources_target:
             self.victory = True
 
-            # Обновляем данные корабля в космосе
             self.space_view.ship.score += self.score
             self.space_view.ship.fuel += self.resources_collected * 20
 
-            # Помечаем планету как пройденную
             if not self.planet_body.visited:
                 self.planet_body.visited = True
                 self.space_view.visited_planets += 1
@@ -156,11 +150,8 @@ class MiniGameView(arcade.View):
         self.resource_list.append(res)
 
     def on_key_press(self, key, modifiers):
-        # ЛОГИКА ВОЗВРАТА В КОСМОС
         if (self.game_over or self.victory) and key == arcade.key.SPACE:
-            # Сбрасываем флаг посадки, чтобы корабль мог лететь
             self.space_view.ship.landed = False
-            # Возвращаем вид космоса
             self.window.show_view(self.space_view)
             return
 
